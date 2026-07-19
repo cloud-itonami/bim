@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>BIM v2 — kami-app Builder</title>
+<style>
+  html, body { margin:0; height:100%; background:#0c0e14; color:#cfe; font-family:system-ui, sans-serif; overflow:hidden; }
+  #gc { display:block; width:100vw; height:100vh; }
+  #hud {
+    position: fixed; top: 8px; left: 8px; padding: 8px 12px;
+    background: rgba(0,0,0,0.55); border-radius: 8px;
+    font: 12px/1.5 ui-monospace, monospace; color: #9fc;
+    pointer-events: none; min-width: 280px;
+  }
+  #hud .head { color:#ffcf6b; font-weight:600; }
+  #hud .k { color:#8aa; }
+  #hud .v { color:#fff; }
+  #hud .src { color:#9bd; }
+  #hint {
+    position: fixed; bottom: 12px; left: 8px; padding: 6px 10px;
+    background: rgba(0,0,0,0.55); border-radius: 8px;
+    font: 11px/1.4 ui-monospace, monospace; color: #9fc;
+    pointer-events: none;
+  }
+  /* Pick info card — slides in from the right when an element is selected. */
+  #pick-card {
+    position: fixed; top: 8px; right: 8px; width: 320px;
+    padding: 14px 16px; background: rgba(20,24,32,0.92);
+    border: 1px solid rgba(255,207,107,0.55);
+    border-left: 3px solid #ffcf6b;
+    border-radius: 10px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.5);
+    color: #e6f0ff;
+    font: 13px/1.55 ui-monospace, monospace;
+    transform: translateX(360px); opacity: 0;
+    transition: transform 0.18s ease-out, opacity 0.18s ease-out;
+    pointer-events: none;
+  }
+  #pick-card.visible { transform: translateX(0); opacity: 1; }
+  #pick-card .title  { color:#ffcf6b; font-weight:600; font-size:14px; margin-bottom:6px; letter-spacing:0.02em; }
+  #pick-card .kind   { display:inline-block; padding:1px 8px; margin-bottom:8px;
+                       background:rgba(255,207,107,0.18); color:#ffcf6b;
+                       border-radius:11px; font-size:11px; }
+  #pick-card .row    { display:flex; justify-content:space-between; gap:12px; padding:2px 0; }
+  #pick-card .k      { color:#8aa; }
+  #pick-card .v      { color:#fff; text-align:right; word-break:break-all; }
+  #pick-card .id     { color:#9bd; font-size:11px; opacity:0.9; word-break:break-all; }
+</style>
+</head>
+<body>
+<canvas id="gc"></canvas>
+<div id="hud">
+  <div><span class="head">BIM v2</span> — kami-app Builder</div>
+  <div><span class="k">scene:</span>   <span class="v src" id="h-scene">—</span></div>
+  <div><span class="k">backend:</span> <span class="v" id="h-backend">—</span></div>
+  <div><span class="k">fps:</span>     <span class="v" id="h-fps">—</span></div>
+  <div><span class="k">cam:</span>     <span class="v" id="h-pos">—</span></div>
+  <div><span class="k">yaw/pitch:</span> <span class="v" id="h-yp">—</span></div>
+  <div><span class="k">picked:</span>  <span class="v" id="h-pick">—</span></div>
+</div>
+<div id="pick-card">
+  <div class="title">Selected element</div>
+  <div class="kind" id="pc-kind">—</div>
+  <div class="id" id="pc-id">—</div>
+  <div class="row"><span class="k">x</span><span class="v" id="pc-x">—</span></div>
+  <div class="row"><span class="k">y</span><span class="v" id="pc-y">—</span></div>
+  <div class="row"><span class="k">z</span><span class="v" id="pc-z">—</span></div>
+  <div class="row"><span class="k">distance</span><span class="v" id="pc-d">—</span></div>
+</div>
+<div id="hint">drag mouse to orbit ・ wheel to zoom ・ left-click = pick (no drag) ・ ?storeyId=at://… for XRPC</div>
+<script type="module">
+import init, { run_bim_v2, run_bim_v2_with_scene } from './v2/kami_app_bim.js';
+
+const $scene = document.getElementById('h-scene');
+const params = new URLSearchParams(window.location.search);
+const storeyId = params.get('storeyId') || '';
+const xrpcBase = params.get('xrpc') || '';
+
+async function loadScene() {
+  if (!storeyId) return null;
+  const url = `${xrpcBase}/xrpc/com.etzhayyim.apps.bim.getStoreyScene?storeyId=${encodeURIComponent(storeyId)}`;
+  try {
+    const resp = await fetch(url, { method: 'GET' });
+    if (!resp.ok) throw new Error(`http ${resp.status}`);
+    const json = await resp.json();
+    if (json.demo) return { demo: true, reason: json.reason };
+    return { scene: json };
+  } catch (e) {
+    console.warn('[bim-v2] XRPC fetch failed, using demo:', e);
+    return { demo: true, reason: String(e) };
+  }
+}
+
+(async () => {
+  await init('./v2/kami_app_bim_bg.wasm');
+  const out = await loadScene();
+  if (out && out.scene) {
+    $scene.textContent = `XRPC: ${storeyId}`;
+    await run_bim_v2_with_scene('gc', JSON.stringify(out.scene));
+  } else {
+    $scene.textContent = `demo${out?.reason ? ` (${out.reason})` : ''}`;
+    await run_bim_v2('gc');
+  }
+
+  const $backend = document.getElementById('h-backend');
+  const $fps = document.getElementById('h-fps');
+  const $pos = document.getElementById('h-pos');
+  const $yp  = document.getElementById('h-yp');
+  const $pick = document.getElementById('h-pick');
+  const $card = document.getElementById('pick-card');
+  const $pcKind = document.getElementById('pc-kind');
+  const $pcId   = document.getElementById('pc-id');
+  const $pcX = document.getElementById('pc-x');
+  const $pcY = document.getElementById('pc-y');
+  const $pcZ = document.getElementById('pc-z');
+  const $pcD = document.getElementById('pc-d');
+  let lastPickAt = 0;
+  setInterval(() => {
+    const h = window.__kami_hud_bim;
+    if (h) {
+      $backend.textContent = h.backend;
+      $fps.textContent = h.fps.toFixed(0);
+      $pos.textContent = `${h.x.toFixed(1)}, ${h.y.toFixed(1)}, ${h.z.toFixed(1)}`;
+      $yp.textContent  = `${(h.yaw * 180 / Math.PI).toFixed(0)}° / ${(h.pitch * 180 / Math.PI).toFixed(0)}°`;
+    }
+    const p = window.__kami_bim_pick;
+    if (p) {
+      $pick.textContent = `${p.kind} ${shortId(p.elementId)} @ ${p.x.toFixed(1)},${p.y.toFixed(1)},${p.z.toFixed(1)}`;
+      if (p.at !== lastPickAt) {
+        lastPickAt = p.at;
+        $pcKind.textContent = p.kind;
+        $pcId.textContent   = p.elementId;
+        $pcX.textContent = `${p.x.toFixed(2)} m`;
+        $pcY.textContent = `${p.y.toFixed(2)} m`;
+        $pcZ.textContent = `${p.z.toFixed(2)} m`;
+        $pcD.textContent = `${p.distance.toFixed(2)} m`;
+        $card.classList.add('visible');
+      }
+    }
+  }, 100);
+
+  function shortId(id) {
+    if (!id) return '—';
+    if (id.length <= 24) return id;
+    return id.slice(0, 10) + '…' + id.slice(-8);
+  }
+})();
+</script>
+</body>
+</html>

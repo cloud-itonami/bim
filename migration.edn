@@ -1,0 +1,4 @@
+{:schema "etzhayyim.migration/v1"
+ :source {:repository "etzhayyim/root" :revision "6fd297f38fe1b547e1d4c15ead9941c6ebaa3b31" :path "60-apps/etzhayyim-project-bim" :tree "d57f68eacbb68e0f35c6e58f579c6b6d2ae43f8e" :tracked-files 16 :bytes 435336}
+ :destination {:repository "etzhayyim/com-etzhayyim-app-bim"}
+ :identity {:allowed-additions ["README.edn" "migration.edn"]}}

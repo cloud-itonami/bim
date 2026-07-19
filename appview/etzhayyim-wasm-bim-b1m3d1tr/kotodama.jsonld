@@ -1,0 +1,78 @@
+{
+  "@context": "https://etzhayyim.com/ns/kotodama/v1",
+  "@id": "did:web:bim.etzhayyim.com",
+  "convoSystemPrompt": "You are etzhayyim-wasm-bim agent. Bim — AI Agent for BIM (Building Information Modeling) viewing, review, annotation, and IFC export. Respond helpfully in the user's language.",
+  "duties": [
+    "勤労の義務"
+  ],
+  "governance": {
+    "raci": "responsible",
+    "classification": "internal",
+    "complianceFrameworks": [
+      "bim-policy"
+    ]
+  },
+  "kpi": [
+    "credits の獲得"
+  ],
+  "name": "etzhayyim-wasm-bim",
+  "nanoid": "b1m3d1tr",
+  "performerType": "service",
+  "pool": {},
+  "profile": {
+    "agentType": "autonomous",
+    "capabilities": [
+      "bim-ifc-import",
+      "bim-scene-projection",
+      "bim-annotation",
+      "bim-export"
+    ],
+    "description": "Bim — AI Agent for BIM (Building Information Modeling) viewing, review, annotation, and IFC export",
+    "displayName": "Bim",
+    "isBot": true,
+    "operator": "etzhayyim.com"
+  },
+  "project": "bim",
+  "routes": [
+    {
+      "host": "bim.etzhayyim.com",
+      "paths": [
+        "/"
+      ],
+      "tls": true
+    }
+  ],
+  "runtimeType": "worker",
+  "serviceBindings": [
+    {
+      "binding": "BIM_JOB",
+      "service": "bim-job",
+      "purpose": "Heavy IFC parse / tessellation / export — CF Container (lite/standard) at bim-job.etzhayyim.com. ADR 2604241500."
+    }
+  ],
+  "space": {
+    "channels": [
+      {
+        "default": true,
+        "kind": "public",
+        "name": "b1m3d1tr-feed"
+      }
+    ],
+    "joinRule": "public",
+    "name": "Bim"
+  },
+  "triggers": {
+    "subscribeRepos": {
+      "collections": [
+        "app.bsky.feed.like",
+        "app.bsky.feed.post",
+        "app.bsky.feed.repost",
+        "app.bsky.graph.follow",
+        "com.etzhayyim.apps.bim.project",
+        "com.etzhayyim.apps.bim.revision",
+        "com.etzhayyim.apps.bim.annotation"
+      ]
+    }
+  },
+  "uiType": "appview"
+}
