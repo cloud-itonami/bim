@@ -2,7 +2,7 @@
 
 `etzhayyim-project-bim` の権威ルール。この project は **App** として設計・実装する。
 
-共通ルールは `60-apps/CLAUDE.md`。土台となるアーキテクチャ判断は ADR
+共通ルールは `60-apps/AGENTS.md`。土台となるアーキテクチャ判断は ADR
 `2604241500-cad-bim-per-game-wasm-topology.md` を正とする。
 
 ## Product Identity

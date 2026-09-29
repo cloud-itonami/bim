@@ -55,7 +55,7 @@ the fix, and that crate is not in this repo.
 
 ## The two halves disagree about where BIM data lives
 
-`CLAUDE.md` (carried over from `etzhayyim/root`, and still the authoring rule for
+`AGENTS.md` (carried over from `etzhayyim/root`, and still the authoring rule for
 this project) has a Prohibitions section that says, in as many words:
 
 > `sdk.pds.createRecord` で `com.etzhayyim.apps.bim.*` を書くこと禁止 (ADR-0036, Hyperdrive 直接)
@@ -80,7 +80,7 @@ render nothing.
 ## Repository layout
 
 ```
-CLAUDE.md                 authoring rules inherited from etzhayyim/root (architecture, ADRs, prohibitions)
+AGENTS.md                 authoring rules inherited from etzhayyim/root (architecture, ADRs, prohibitions)
 NOTICE                    Apache-2.0 + etzhayyim Charter Compliance Rider v3.1
 README.edn                extraction record (machine-readable; superseded as an entry point by this file)
 migration.edn             what was extracted, with a checkable file count and byte count
