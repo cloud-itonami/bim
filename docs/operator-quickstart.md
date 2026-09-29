@@ -28,7 +28,7 @@ git ls-files
 ```
 
 ```
-CLAUDE.md
+AGENTS.md
 NOTICE
 README.edn
 appview/etzhayyim-wasm-bim-b1m3d1tr/kotodama.jsonld
@@ -52,7 +52,7 @@ The four files that carry all the meaning:
 
 | file | what it decides |
 |---|---|
-| `CLAUDE.md` | the architecture the project intends, its ADR references, and its **Prohibitions** — including the one `kotoba/` violates |
+| `AGENTS.md` | the architecture the project intends, its ADR references, and its **Prohibitions** — including the one `kotoba/` violates |
 | `kotoba/src/registry.ts` | the only working behaviour in the repo: FK-guarded project / revision / annotation writes |
 | `appview/.../src/app.ts` | the five XRPC methods, all Phase-0 stubs except the job callback |
 | `appview/.../svelte/static/v2.htm` | the viewer page, and the `init()` call that fails in §6 |
@@ -65,8 +65,8 @@ The four files that carry all the meaning:
 checkable today:
 
 ```bash
-git ls-files CLAUDE.md NOTICE appview kotoba | wc -l
-git ls-files CLAUDE.md NOTICE appview kotoba | xargs wc -c | tail -1
+git ls-files AGENTS.md NOTICE appview kotoba | wc -l
+git ls-files AGENTS.md NOTICE appview kotoba | xargs wc -c | tail -1
 ```
 
 ```
